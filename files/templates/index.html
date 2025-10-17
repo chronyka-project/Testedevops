@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagina Inicial</title> <!-- Titulo da sua Pagina -->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Aqui Vinculamos nosso css static no html lembrando que a pasta
+    deve ser static/css/css.css -->
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">INICIO</a></li>
+            <li><a href="contato.html">CONTATO</a></li>
+            <li><a href="about.html">SOBRE</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Bem-vindo à Página de Início!</h1>
+    </header>
+
+    <section class="content">
+        <h2>Seção 1</h2>
+        <p>Conteúdo da Seção 1...</p>
+    </section>
+
+    <section class="content">
+        <h2>Seção 2</h2>
+        <p>Conteúdo da Seção 2...</p>
+    </section>
+
+    <footer>
+        <p>Rodapé - Todos os direitos reservados &copy; 2023</p>
+    </footer>
+</body>
+</html>

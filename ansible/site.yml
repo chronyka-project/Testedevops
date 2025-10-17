@@ -1,0 +1,51 @@
+---
+- name: Provision Flask Application Server
+  hosts: all 
+  become: yes # Permite rodar comandos com sudo
+  gather_facts: yes
+
+  vars:
+    app_user: devops_app 
+    app_dir: /var/www/flask_app
+    app_port: 5000
+
+  tasks:
+    - name: 1. Instalar Python e ferramentas (depende da sua distro: apt/yum)
+      ansible.builtin.package:
+        name: 
+          - python3
+          - python3-pip
+          - git
+        state: present
+
+    - name: 2. Criar usuário da aplicação
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        state: present
+        shell: /bin/bash
+
+    - name: 3. Clonar ou copiar o código da aplicação (a pasta 'files' da sua estrutura)
+      ansible.builtin.copy:
+        src: ../app.py  # Caminho relativo à pasta ansible/
+        dest: "{{ app_dir }}/app.py"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0644'
+
+    - name: 4. Instalar o Flask e dependências (usando requirements.txt)
+      ansible.builtin.pip:
+        requirements: ../requirements.txt # Caminho relativo à pasta ansible/
+        state: present
+        virtualenv: "{{ app_dir }}/venv"
+        virtualenv_command: python3 -m venv
+
+    - name: 5. Iniciar a aplicação Flask (Exemplo simples com nohup)
+      ansible.builtin.shell:
+        cmd: nohup {{ app_dir }}/venv/bin/python {{ app_dir }}/app.py > /var/log/flask_app.log 2>&1 &
+      args:
+        chdir: "{{ app_dir }}"
+      become_user: "{{ app_user }}" # Executa como o usuário da aplicação
+      
+    - name: 6. Abrir a porta do Firewall (Se a VM usar firewall, ex: ufw)
+      ansible.builtin.command: ufw allow {{ app_port }}/tcp
+      ignore_errors: yes

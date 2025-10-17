@@ -1,0 +1,39 @@
+name: Terraform vSphere Deploy
+
+on:
+  push:
+    branches:
+      - prod
+    paths:
+      - 'terraform/**' # Aciona o workflow apenas se houver mudanças no seu código Terraform
+  workflow_dispatch: # Permite execução manual via UI do GitHub
+
+jobs:
+  terraform:
+    runs-on: self-hosted
+    
+    env:
+      TF_VAR_vsphere_server: ${{ secrets.VSPHERE_SERVER }}
+      TF_VAR_vsphere_user: ${{ secrets.VSPHERE_USER }}
+      TF_VAR_vsphere_password: ${{ secrets.VSPHERE_PASSWORD }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Terraform Init
+        id: init
+        run: /usr/bin/terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        id: plan
+        run: /usr/bin/terraform plan -input=false -out=tfplan
+        working-directory: ./terraform
+        continue-on-error: true # Permite que o apply seja pulado em caso de erro
+
+      - name: Terraform Apply
+        # CORREÇÃO FINAL: Roda se for na branch 'prod' E se o plan foi bem-sucedido
+        if: github.ref == 'refs/heads/prod' && steps.plan.outcome == 'success'
+        run: /usr/bin/terraform apply -auto-approve tfplan
+        working-directory: ./terraform
